@@ -1,27 +1,28 @@
-/* eslint-disable react/prop-types */
 import React, { useState } from 'react'
 import { useNavigate } from "react-router-dom"
+import EVENTS from 'src/config/events';
+import { useSockets } from 'src/context/socket.context';
 
-const Home = ({ socket }) => {
+const Home = () => {
+    const { socket, userName, setUserName } = useSockets();
+
     const navigate = useNavigate()
-    const [userName, setUserName] = useState("")
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         localStorage.setItem("userName", userName)
-        socket.emit("newUser", { userName, socketID: socket.id })
         navigate("/chat")
     }
 
     return (
         <form className='home__container' onSubmit={handleSubmit}>
             <h2 className='home__header'>Sign in to Open Chat</h2>
-            <label htmlFor="username">Username</label>
+            <label htmlFor="userName">Username</label>
             <input type="text"
                 minLength={6}
-                name="username"
-                id='username'
-                className='username__input'
+                name="userName"
+                id='userName'
+                className='userName__input'
                 value={userName}
                 onChange={e => setUserName(e.target.value)}
             />
