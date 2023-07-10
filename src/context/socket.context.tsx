@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
 import { SOCKET_URL } from "src/config/default";
 import EVENTS from "src/config/events";
+import notification from "src/helpers/notification";
+import { getItem } from "src/helpers/utils";
 
 export type TypeRoom = { roomId: string, roomName: string, socketId: string }
 export type TypeMessage = { id: string, text: string; time: string; userName: string; socketId: string }
@@ -9,9 +11,9 @@ export type TypeMessage = { id: string, text: string; time: string; userName: st
 interface Context {
   socket: Socket;
   userName: string;
-  messages: TypeMessage[];
   roomId?: string;
   rooms: TypeRoom[];
+  messages: TypeMessage[];
   setUserName: (value: string) => void;
   setMessages: () => void;
 }
@@ -20,11 +22,11 @@ const socket = io(SOCKET_URL);
 
 const SocketContext = createContext<Context>({
   socket,
-  setUserName: () => false,
-  setMessages: () => false,
+  userName: "",
   rooms: [],
   messages: [],
-  userName: "",
+  setUserName: () => false,
+  setMessages: () => false,
 });
 
 function SocketsProvider(props: any) {
@@ -44,7 +46,10 @@ function SocketsProvider(props: any) {
   });
 
   socket.on(EVENTS.SERVER.JOINED_ROOM, (value) => {
-    console.log(`"${userName}" joined "${value}" room`);
+    // const roomName = rooms.find(item => item.roomId === value)?.roomName;
+    // if (roomName && userName != getItem(userName)) {
+    //   notification.onSuccess(`"${userName}" joined "${roomName}" room`)
+    // }
 
     setRoomId(value);
     setMessages([]);

@@ -5,22 +5,27 @@ import ChatFooter from './ChatFooter'
 import { useSockets } from 'src/context/socket.context'
 import EVENTS from 'src/config/events'
 import { useNavigate } from 'react-router-dom'
+import { getItem, setItem } from 'src/helpers/utils'
+import { useAuthState } from 'src/context/auth.context'
 
 const ChatPage = () => {
     const navigate = useNavigate()
     const { socket, userName, setUserName, messages, rooms } = useSockets();
 
-    if (!localStorage.getItem('userName')) {
-        navigate('/')
-        return <></>
-    }
+    const userProvider = useAuthState();
+    const { authState } = userProvider;
 
-    // if (userName !== localStorage.getItem('userName')) {
-    //     setUserName(String(localStorage.getItem('userName')))
-    // }
+    useEffect(() => {
+        ; (() => {
+            if (authState.isAuthenticated) {
+                setItem('userName', String(authState.user?.fullname || authState.user?.email))
+                setUserName(String(authState.user?.fullname || authState.user?.email))
+            }
+        })()
+    }, [authState.isAuthenticated]);
 
-    // const [typingStatus, setTypingStatus] = useState("")
-    // const lastMessageRef = useRef(null);
+    const [typingStatus, setTypingStatus] = useState("")
+    const lastMessageRef = useRef(null);
 
     // rooms.find(item => item.roomName !== 'testroom')
 
@@ -36,6 +41,16 @@ const ChatPage = () => {
     //     // 👇️ scroll to bottom every time messages change
     //     lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
     // }, [messages]);
+
+
+    if (!authState.isReady) {
+        return <></>
+    }
+
+    if (!authState.isAuthenticated) {
+        navigate('/login')
+        return <>Redirect...</>
+    }
 
     return (
         <div className="chat">
